@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,8 +176,8 @@ public class BuildImageMojo extends AbstractPackagerMojo {
 		try {
 			DockerConfiguration dockerConfiguration = (this.docker != null) ? this.docker.asDockerConfiguration()
 					: null;
-			Builder builder = new Builder(new MojoBuildLog(this::getLog), dockerConfiguration);
 			BuildRequest request = getBuildRequest(libraries);
+			Builder builder = new Builder(new MojoBuildLog(this::getLog), dockerConfiguration);
 			builder.build(request);
 		}
 		catch (IOException ex) {
@@ -218,23 +218,26 @@ public class BuildImageMojo extends AbstractPackagerMojo {
 	}
 
 	private TarArchive getApplicationContent(Owner owner, Libraries libraries) {
-		ImagePackager packager = getConfiguredPackager(() -> new ImagePackager(getJarFile()));
+		ImagePackager packager = getConfiguredPackager(() -> new ImagePackager(getArchiveFile()));
 		return new PackagedTarArchive(owner, libraries, packager);
 	}
 
-	private File getJarFile() {
+	private File getArchiveFile() {
 		// We can use 'project.getArtifact().getFile()' because that was done in a
 		// forked lifecycle and is now null
 		StringBuilder name = new StringBuilder(this.finalName);
 		if (StringUtils.hasText(this.classifier)) {
 			name.append("-").append(this.classifier);
 		}
-		name.append(".jar");
-		File jarFile = new File(this.sourceDirectory, name.toString());
-		if (!jarFile.exists()) {
-			throw new IllegalStateException("Executable jar file required for building image");
+		File archiveFile = new File(this.sourceDirectory, name.toString() + ".jar");
+		if (archiveFile.exists()) {
+			return archiveFile;
 		}
-		return jarFile;
+		archiveFile = new File(this.sourceDirectory, name.toString() + ".war");
+		if (archiveFile.exists()) {
+			return archiveFile;
+		}
+		throw new IllegalStateException("A jar or war file is required for building image");
 	}
 
 	private BuildRequest customize(BuildRequest request) {

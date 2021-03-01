@@ -353,6 +353,10 @@
       "defaultValue": "org.springframework.boot:type=Admin,name=SpringApplication"
     },
     {
+      "name": "spring.artemis.broker-url",
+      "defaultValue": "tcp://localhost:61616"
+    },
+    {
       "name": "spring.artemis.pool.maximum-active-session-per-connection",
       "deprecation": {
         "replacement": "spring.artemis.pool.max-sessions-per-connection"
@@ -372,9 +376,13 @@
       "type": "java.lang.Boolean",
       "description": "Create the required batch tables on startup if necessary. Enabled automatically\n if no custom table prefix is set or if a custom schema is configured.",
       "deprecation": {
-        "replacement": "spring.batch.initialize-schema",
+        "replacement": "spring.batch.jdbc.initialize-schema",
         "level": "error"
       }
+    },
+    {
+      "name": "spring.batch.jdbc.initialize-schema",
+      "defaultValue": "embedded"
     },
     {
       "name": "spring.batch.job.enabled",
@@ -745,14 +753,12 @@
       "defaultValue": "default"
     },
     {
-      "name": "spring.data.solr.repositories.enabled",
-      "type": "java.lang.Boolean",
-      "description": "Whether to enable Solr repositories.",
-      "defaultValue": true
-    },
-    {
       "name": "spring.datasource.initialization-mode",
       "defaultValue": "embedded"
+    },
+    {
+      "name": "spring.datasource.initialization-order",
+      "defaultValue": "before-jpa"
     },
     {
       "name": "spring.datasource.jmx-enabled",
@@ -1039,116 +1045,164 @@
     },
     {
       "name": "spring.jta.bitronix.properties.allow-multiple-lrc",
-      "description": "Whether to allow multiple LRC resources to be enlisted into the same transaction.",
-      "defaultValue": false
+      "type": "java.lang.Boolean",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.asynchronous2-pc",
-      "description": "Whether to enable asynchronously execution of two phase commit.",
-      "defaultValue": false
+      "type": "java.lang.Boolean",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.background-recovery-interval",
-      "description": "Interval in minutes at which to run the recovery process in the background.",
-      "defaultValue": 1,
+      "type": "java.lang.Integer",
       "deprecation": {
-        "replacement": "spring.jta.bitronix.properties.background-recovery-interval-seconds"
+        "level": "error"
       }
     },
     {
       "name": "spring.jta.bitronix.properties.background-recovery-interval-seconds",
-      "description": "Interval in seconds at which to run the recovery process in the background.",
-      "defaultValue": 60
+      "type": "java.lang.Integer",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.current-node-only-recovery",
-      "description": "Whether to recover only the current node. Should be enabled if you run multiple instances of the transaction manager on the same JMS and JDBC resources.",
-      "defaultValue": true
+      "type": "java.lang.Boolean",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.debug-zero-resource-transaction",
-      "description": "Whether to log the creation and commit call stacks of transactions executed without a single enlisted resource.",
-      "defaultValue": false
+      "type": "java.lang.Boolean",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.default-transaction-timeout",
-      "description": "Default transaction timeout, in seconds.",
-      "defaultValue": 60
+      "type": "java.lang.Integer",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.disable-jmx",
-      "description": "Whether to enable JMX support.",
-      "defaultValue": false
+      "type": "java.lang.Boolean",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.exception-analyzer",
-      "description": "Set the fully qualified name of the exception analyzer implementation to use."
+      "type": "java.lang.String",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.filter-log-status",
-      "description": "Whether to enable filtering of logs so that only mandatory logs are written.",
-      "defaultValue": false
+      "type": "java.lang.Boolean",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.force-batching-enabled",
-      "description": "Whether disk forces are batched.",
-      "defaultValue": true
+      "type": "java.lang.Boolean",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.forced-write-enabled",
-      "description": "Whether logs are forced to disk.",
-      "defaultValue": true
+      "type": "java.lang.Boolean",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.graceful-shutdown-interval",
-      "description": "Maximum amount of seconds the TM waits for transactions to get done before aborting them at shutdown time.",
-      "defaultValue": 60
+      "type": "java.lang.String",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.jndi-transaction-synchronization-registry-name",
-      "description": "JNDI name of the TransactionSynchronizationRegistry."
+      "type": "java.lang.String",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.jndi-user-transaction-name",
-      "description": "JNDI name of the UserTransaction."
+      "type": "java.lang.String",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.journal",
-      "description": "Name of the journal. Can be 'disk', 'null', or a class name.",
-      "defaultValue": "disk"
+      "type": "java.lang.String",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.log-part1-filename",
-      "description": "Name of the first fragment of the journal.",
-      "defaultValue": "btm1.tlog"
+      "type": "java.lang.String",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.log-part2-filename",
-      "description": "Name of the second fragment of the journal.",
-      "defaultValue": "btm2.tlog"
+      "type": "java.lang.String",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.max-log-size-in-mb",
-      "description": "Maximum size in megabytes of the journal fragments.",
-      "defaultValue": 2
+      "type": "java.lang.Integer",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.resource-configuration-filename",
-      "description": "ResourceLoader configuration file name."
+      "type": "java.lang.String",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.server-id",
-      "description": "ASCII ID that must uniquely identify this TM instance. Defaults to the machine's IP address."
+      "type": "java.lang.String",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.skip-corrupted-logs",
-      "description": "Skip corrupted transactions log entries. Use only at last resort when all you have to recover is a pair of corrupted files.",
-      "defaultValue": false
+      "type": "java.lang.Boolean",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.bitronix.properties.warn-about-zero-resource-transaction",
-      "description": "Whether to log a warning for transactions executed without a single enlisted resource.",
-      "defaultValue": true
+      "type": "java.lang.Boolean",
+      "deprecation": {
+        "level": "error"
+      }
     },
     {
       "name": "spring.jta.enabled",
@@ -1848,6 +1902,17 @@
           "parameters": {
             "target": "java.sql.Driver"
           }
+        }
+      ]
+    },
+    {
+      "name": "spring.datasource.initialization-order",
+      "values": [
+        {
+          "value": "before-jpa"
+        },
+        {
+          "value": "after-jpa"
         }
       ]
     },

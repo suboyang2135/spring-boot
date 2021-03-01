@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.boot.autoconfigure.validation.ValidatorAdapter;
+import org.springframework.boot.autoconfigure.web.reactive.WebFluxAutoConfiguration.WebFluxConfig;
 import org.springframework.boot.test.context.runner.ReactiveWebApplicationContextRunner;
 import org.springframework.boot.web.codec.CodecCustomizer;
 import org.springframework.boot.web.reactive.filter.OrderedHiddenHttpMethodFilter;
@@ -66,6 +67,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.filter.reactive.HiddenHttpMethodFilter;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
+import org.springframework.web.reactive.config.DelegatingWebFluxConfiguration;
 import org.springframework.web.reactive.config.WebFluxConfigurationSupport;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.function.server.support.RouterFunctionMapping;
@@ -209,15 +211,6 @@ class WebFluxAutoConfigurationTests {
 			Date date = Date.from(ZonedDateTime.of(1988, 6, 25, 20, 30, 0, 0, ZoneId.systemDefault()).toInstant());
 			// formatting conversion service should use simple toString()
 			assertThat(conversionService.convert(date, String.class)).isEqualTo(date.toString());
-		});
-	}
-
-	@Test
-	void customDateFormatWithDeprecatedProperty() {
-		this.contextRunner.withPropertyValues("spring.webflux.date-format:dd*MM*yyyy").run((context) -> {
-			FormattingConversionService conversionService = context.getBean(FormattingConversionService.class);
-			Date date = Date.from(ZonedDateTime.of(1988, 6, 25, 20, 30, 0, 0, ZoneId.systemDefault()).toInstant());
-			assertThat(conversionService.convert(date, String.class)).isEqualTo("25*06*1988");
 		});
 	}
 
@@ -553,6 +546,17 @@ class WebFluxAutoConfigurationTests {
 				});
 	}
 
+	@Test
+	@SuppressWarnings("rawtypes")
+	void userConfigurersCanBeOrderedBeforeOrAfterTheAutoConfiguredConfigurer() {
+		this.contextRunner.withBean(HighPrecedenceConfigurer.class, HighPrecedenceConfigurer::new)
+				.withBean(LowPrecedenceConfigurer.class, LowPrecedenceConfigurer::new)
+				.run((context) -> assertThat(context.getBean(DelegatingWebFluxConfiguration.class))
+						.extracting("configurers.delegates").asList()
+						.extracting((configurer) -> (Class) configurer.getClass()).containsExactly(
+								HighPrecedenceConfigurer.class, WebFluxConfig.class, LowPrecedenceConfigurer.class));
+	}
+
 	private Map<PathPattern, Object> getHandlerMap(ApplicationContext context) {
 		HandlerMapping mapping = context.getBean("resourceHandlerMapping", HandlerMapping.class);
 		if (mapping instanceof SimpleUrlHandlerMapping) {
@@ -793,6 +797,16 @@ class WebFluxAutoConfigurationTests {
 		@Override
 		public void setLocaleContext(ServerWebExchange exchange, LocaleContext localeContext) {
 		}
+
+	}
+
+	@Order(-100)
+	static class HighPrecedenceConfigurer implements WebFluxConfigurer {
+
+	}
+
+	@Order(100)
+	static class LowPrecedenceConfigurer implements WebFluxConfigurer {
 
 	}
 

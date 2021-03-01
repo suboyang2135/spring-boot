@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -246,6 +246,8 @@ public class SpringApplication {
 
 	private boolean lazyInitialization = false;
 
+	private String environmentPrefix;
+
 	private ApplicationContextFactory applicationContextFactory = ApplicationContextFactory.DEFAULT;
 
 	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
@@ -362,6 +364,9 @@ public class SpringApplication {
 		listeners.environmentPrepared(bootstrapContext, environment);
 		DefaultPropertiesPropertySource.moveToEnd(environment);
 		configureAdditionalProfiles(environment);
+		if (environment.getProperty("spring.main.environment-prefix") != null) {
+			throw new IllegalStateException("Environment prefix cannot be set via properties.");
+		}
 		bindToSpringApplication(environment);
 		if (!this.isCustomEnvironment) {
 			environment = new EnvironmentConverter(getClassLoader()).convertEnvironmentIfNecessary(environment,
@@ -423,7 +428,7 @@ public class SpringApplication {
 				// Not allowed in some environments.
 			}
 		}
-		refresh((ApplicationContext) context);
+		refresh(context);
 	}
 
 	private void configureHeadlessProperty() {
@@ -745,18 +750,6 @@ public class SpringApplication {
 	 */
 	protected BeanDefinitionLoader createBeanDefinitionLoader(BeanDefinitionRegistry registry, Object[] sources) {
 		return new BeanDefinitionLoader(registry, sources);
-	}
-
-	/**
-	 * Refresh the underlying {@link ApplicationContext}.
-	 * @param applicationContext the application context to refresh
-	 * @deprecated since 2.3.0 in favor of
-	 * {@link #refresh(ConfigurableApplicationContext)}
-	 */
-	@Deprecated
-	protected void refresh(ApplicationContext applicationContext) {
-		Assert.isInstanceOf(ConfigurableApplicationContext.class, applicationContext);
-		refresh((ConfigurableApplicationContext) applicationContext);
 	}
 
 	/**
@@ -1186,6 +1179,14 @@ public class SpringApplication {
 		this.resourceLoader = resourceLoader;
 	}
 
+	public String getEnvironmentPrefix() {
+		return this.environmentPrefix;
+	}
+
+	public void setEnvironmentPrefix(String environmentPrefix) {
+		this.environmentPrefix = environmentPrefix;
+	}
+
 	/**
 	 * Sets the type of Spring {@link ApplicationContext} that will be created. If not
 	 * specified defaults to {@link #DEFAULT_SERVLET_WEB_CONTEXT_CLASS} for web based
@@ -1274,6 +1275,7 @@ public class SpringApplication {
 	/**
 	 * Set the {@link ApplicationStartup} to use for collecting startup metrics.
 	 * @param applicationStartup the application startup to use
+	 * @since 2.4.0
 	 */
 	public void setApplicationStartup(ApplicationStartup applicationStartup) {
 		this.applicationStartup = (applicationStartup != null) ? applicationStartup : ApplicationStartup.DEFAULT;
@@ -1282,6 +1284,7 @@ public class SpringApplication {
 	/**
 	 * Returns the {@link ApplicationStartup} used for collecting startup metrics.
 	 * @return the application startup
+	 * @since 2.4.0
 	 */
 	public ApplicationStartup getApplicationStartup() {
 		return this.applicationStartup;

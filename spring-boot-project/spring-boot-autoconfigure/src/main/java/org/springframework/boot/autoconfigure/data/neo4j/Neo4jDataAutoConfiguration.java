@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.springframework.data.neo4j.core.Neo4jTemplate;
 import org.springframework.data.neo4j.core.convert.Neo4jConversions;
 import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
 import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.RelationshipProperties;
 import org.springframework.data.neo4j.core.transaction.Neo4jTransactionManager;
 import org.springframework.data.neo4j.repository.config.Neo4jRepositoryConfigurationExtension;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -76,7 +77,8 @@ public class Neo4jDataAutoConfiguration {
 	@ConditionalOnMissingBean
 	public Neo4jMappingContext neo4jMappingContext(ApplicationContext applicationContext,
 			Neo4jConversions neo4jConversions) throws ClassNotFoundException {
-		Set<Class<?>> initialEntityClasses = new EntityScanner(applicationContext).scan(Node.class);
+		Set<Class<?>> initialEntityClasses = new EntityScanner(applicationContext).scan(Node.class,
+				RelationshipProperties.class);
 		Neo4jMappingContext context = new Neo4jMappingContext(neo4jConversions);
 		context.setInitialEntitySet(initialEntityClasses);
 		return context;
